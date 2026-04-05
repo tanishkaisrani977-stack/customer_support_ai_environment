@@ -1,0 +1,7 @@
+name: openenv-customer-support
+version: 1.0.0
+tasks:
+  - easy
+  - medium
+  - hard
+reward_range: [0.0, 1.0]
