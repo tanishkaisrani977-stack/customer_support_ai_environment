@@ -1,8 +1,8 @@
 ---
 title: OpenEnv Customer Support
-emoji: headset
-colorFrom: teal
-colorTo: orange
+emoji: 🎧
+colorFrom: blue
+colorTo: green
 sdk: docker
 app_port: 7860
 pinned: false
