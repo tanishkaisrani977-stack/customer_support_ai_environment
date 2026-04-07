@@ -18,6 +18,8 @@ class CustomerSupportEnvTests(unittest.TestCase):
                 observation = env.reset()
                 self.assertEqual(observation.ticket_id, ticket_id)
                 self.assertEqual(env.state()["task_name"], task_name)
+                self.assertGreater(env.state()["total_score"], 0.0)
+                self.assertLess(env.state()["total_score"], 1.0)
 
     def test_easy_ticket_reaches_task_score_within_open_interval(self):
         env = CustomerSupportEnv(task_name="easy")
@@ -83,6 +85,8 @@ class CustomerSupportEnvTests(unittest.TestCase):
         self.assertEqual(reward.score, 0.001)
         self.assertFalse(done)
         self.assertEqual(info["ticket_scores"], [0.001])
+        self.assertGreater(info["total_score"], 0.0)
+        self.assertLess(info["total_score"], 1.0)
         self.assertIn("Wrong action order penalty applied.", info["feedback"])
 
 

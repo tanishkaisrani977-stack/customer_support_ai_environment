@@ -29,7 +29,7 @@ class CustomerSupportEnv:
         self.step_count = 0
         self.done = False
         self.ticket_progress = [TicketProgress() for _ in self.task.input_tickets]
-        self.total_score = 0.0
+        self.total_score = self._normalize_task_score(0.0)
         self.current_observation = self._build_observation(self.current_ticket_index)
         return self.current_observation
 
@@ -59,8 +59,6 @@ class CustomerSupportEnv:
             advanced = self._advance_ticket()
 
         self.total_score = self._compute_total_score()
-        if self.done:
-            self.total_score = self._normalize_task_score(self.total_score)
         self.current_observation = (
             self._terminal_observation() if self.done else self._build_observation(self.current_ticket_index)
         )
@@ -72,12 +70,14 @@ class CustomerSupportEnv:
             task_name=self.task_name,
             current_ticket_index=self.current_ticket_index,
             step_count=self.step_count,
-            total_score=self.total_score,
+            total_score=self._normalize_task_score(self.total_score),
             done=self.done,
             current_observation=self.current_observation,
             ticket_progress=self.ticket_progress,
         )
         payload = snapshot.model_dump()
+        for progress in payload["ticket_progress"]:
+            progress["raw_score"] = self._normalize_task_score(progress["raw_score"])
         payload["available_tasks"] = self.available_tasks
         payload["task_metadata"] = self.task.metadata
         payload["task_expected_outputs"] = self.task.expected_outputs
@@ -98,9 +98,9 @@ class CustomerSupportEnv:
 
     def _compute_total_score(self) -> float:
         if not self.ticket_progress:
-            return 0.0
+            return self._normalize_task_score(0.0)
         ticket_scores = [max(0.0, min(1.0, progress.raw_score)) for progress in self.ticket_progress]
-        return round(sum(ticket_scores) / len(ticket_scores), 4)
+        return self._normalize_task_score(sum(ticket_scores) / len(ticket_scores))
 
     def _normalize_task_score(self, value: float) -> float:
         rounded = round(value, 4)
