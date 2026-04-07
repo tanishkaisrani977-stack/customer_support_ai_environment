@@ -35,7 +35,7 @@ class CustomerSupportEnv:
 
     def step(self, action: Action | dict) -> tuple[Observation, Reward, bool, dict]:
         if self.done:
-            reward = Reward(score=0.0, feedback="Episode already complete.")
+            reward = Reward(score=0.001, feedback="Episode already complete.")
             return self.current_observation, reward, True, self._build_info(False, True, reward.feedback)
 
         parsed_action = action if isinstance(action, Action) else Action.model_validate(action)
@@ -134,6 +134,7 @@ class CustomerSupportEnv:
             self.task.input_tickets[self.current_ticket_index].input_ticket.ticket_id if not self.done else None
         )
         ticket_scores = [round(max(0.0, min(1.0, progress.raw_score)), 4) for progress in self.ticket_progress]
+        ticket_scores = [self._normalize_task_score(score) for score in ticket_scores]
         return {
             "task_name": self.task_name,
             "step_count": self.step_count,

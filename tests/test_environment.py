@@ -80,9 +80,9 @@ class CustomerSupportEnvTests(unittest.TestCase):
 
         _, reward, done, info = env.step(Action(action_type="reply", content="We can help."))
 
-        self.assertEqual(reward.score, 0.0)
+        self.assertEqual(reward.score, 0.001)
         self.assertFalse(done)
-        self.assertEqual(info["ticket_scores"], [0.0])
+        self.assertEqual(info["ticket_scores"], [0.001])
         self.assertIn("Wrong action order penalty applied.", info["feedback"])
 
 

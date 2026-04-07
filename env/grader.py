@@ -28,7 +28,12 @@ def _normalize(text: str) -> str:
 
 
 def _clamp_score(value: float) -> float:
-    return max(0.0, min(1.0, round(value, 4)))
+    rounded = round(value, 4)
+    if rounded <= 0.0:
+        return 0.001
+    if rounded >= 1.0:
+        return 0.999
+    return rounded
 
 
 class DeterministicGrader:
@@ -48,7 +53,7 @@ class DeterministicGrader:
             progress.penalties += DUPLICATE_ACTION_PENALTY
             feedback = "Duplicate action penalty applied."
             return GradeResult(
-                reward=Reward(score=0.0, feedback=feedback),
+                reward=Reward(score=_clamp_score(0.0), feedback=feedback),
                 raw_delta=-DUPLICATE_ACTION_PENALTY,
                 feedback=feedback,
             )
@@ -65,7 +70,7 @@ class DeterministicGrader:
             progress.penalties += WRONG_ORDER_PENALTY
             feedback = "Wrong action order penalty applied."
             return GradeResult(
-                reward=Reward(score=0.0, feedback=feedback),
+                reward=Reward(score=_clamp_score(0.0), feedback=feedback),
                 raw_delta=-WRONG_ORDER_PENALTY,
                 feedback=feedback,
             )
