@@ -9,4 +9,4 @@ tasks:
   - easy
   - medium
   - hard
-reward_range: [0.0, 1.0]
+reward_range: [0.0001, 0.9999]

@@ -55,7 +55,7 @@ class Action(BaseModel):
 
 
 class Reward(BaseModel):
-    score: float = Field(ge=0.0, le=1.0)
+    score: float = Field(ge=0.0001, le=0.9999)
     feedback: str
 
 
