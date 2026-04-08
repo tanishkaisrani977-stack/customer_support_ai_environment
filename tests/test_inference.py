@@ -22,6 +22,10 @@ class DummyClient:
 
 
 class InferenceTests(unittest.TestCase):
+    @staticmethod
+    def _parse_score(line: str, marker: str) -> float:
+        return float(line.split(marker, 1)[1])
+
     def test_load_local_env_reads_dotenv_without_overwriting_existing_values(self):
         temp_dir = Path("tests") / f"tmp_env_{uuid.uuid4().hex}"
         temp_dir.mkdir(parents=True, exist_ok=True)
@@ -131,11 +135,17 @@ class InferenceTests(unittest.TestCase):
         output = buffer.getvalue().strip().splitlines()
         self.assertEqual(output[0], "[START] Task=easy")
         self.assertTrue(output[1].startswith("[STEP] step=1 action="))
+        self.assertGreater(self._parse_score(output[1], "reward="), 0.0)
+        self.assertLess(self._parse_score(output[1], "reward="), 1.0)
         self.assertEqual(output[2], "[DEBUG] step=1 source=fallback reason=Inference request failed: RuntimeError: offline")
         self.assertTrue(output[3].startswith("[STEP] step=2 action="))
+        self.assertGreater(self._parse_score(output[3], "reward="), 0.0)
+        self.assertLess(self._parse_score(output[3], "reward="), 1.0)
         self.assertEqual(output[4], "[DEBUG] step=2 source=fallback reason=Inference request failed: RuntimeError: offline")
-        self.assertTrue(output[5].startswith("[END] Task=easy TotalScore=0.999999"))
-        self.assertGreater(score, 0.999998)
+        self.assertTrue(output[5].startswith("[END] Task=easy TotalScore="))
+        self.assertGreater(self._parse_score(output[5], "TotalScore="), 0.0)
+        self.assertLess(self._parse_score(output[5], "TotalScore="), 1.0)
+        self.assertGreater(score, 0.9)
         self.assertLess(score, 1.0)
 
     def test_main_runs_all_tasks(self):

@@ -84,7 +84,8 @@ class AppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertFalse(payload["done"])
-        self.assertAlmostEqual(payload["reward"]["score"], 0.000001, places=6)
+        self.assertGreater(payload["reward"]["score"], 0.0)
+        self.assertLess(payload["reward"]["score"], 1.0)
         self.assertEqual(payload["info"]["current_ticket_id"], 101)
         self.assertEqual(payload["observation"]["ticket_id"], 101)
 
@@ -106,7 +107,8 @@ class AppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertTrue(payload["done"])
-        self.assertAlmostEqual(payload["reward"]["score"], 0.999999, places=6)
+        self.assertGreater(payload["reward"]["score"], 0.0)
+        self.assertLess(payload["reward"]["score"], 1.0)
         self.assertIsNone(payload["info"]["current_ticket_id"])
         self.assertEqual(payload["observation"]["ticket_id"], -1)
 

@@ -108,8 +108,11 @@ class CustomerSupportEnv:
     def _compute_total_score(self) -> float:
         if not self.ticket_progress:
             return safe_score(0.0)
-        ticket_scores = [safe_score(max(0.0, min(1.0, float(progress.raw_score)))) for progress in self.ticket_progress]
-        return safe_score(sum(ticket_scores) / float(len(ticket_scores)))
+        ticket_scores = [safe_score(progress.raw_score) for progress in self.ticket_progress]
+        final_score = (sum(ticket_scores) + SCORE_EPSILON) / (float(len(ticket_scores)) + (2 * SCORE_EPSILON))
+        final_score = safe_score(final_score)
+        assert 0 < final_score < 1, f"Invalid score: {final_score}"
+        return final_score
 
     def _normalize_task_score(self, value: float) -> float:
         return safe_score(value)
@@ -125,6 +128,7 @@ class CustomerSupportEnv:
             reward_score = min(float(self.total_score), float(reward_score))
         reward_score = safe_score(reward_score)
         self.emitted_reward_total = min(float(self.total_score), float(self.emitted_reward_total + reward_score))
+        assert 0 < reward_score < 1, f"Invalid score: {reward_score}"
         return Reward(score=reward_score, feedback=feedback)
 
     def _build_observation(self, ticket_index: int) -> Observation:
@@ -150,7 +154,7 @@ class CustomerSupportEnv:
         current_ticket_id = (
             self.task.input_tickets[self.current_ticket_index].input_ticket.ticket_id if not self.done else None
         )
-        ticket_scores = safe_score_list(max(0.0, min(1.0, float(progress.raw_score))) for progress in self.ticket_progress)
+        ticket_scores = safe_score_list(float(progress.raw_score) for progress in self.ticket_progress)
         total_score = safe_score(self.total_score)
         validate_scores({"total_score": total_score, **{f"ticket_score_{index}": score for index, score in enumerate(ticket_scores)}})
         return {

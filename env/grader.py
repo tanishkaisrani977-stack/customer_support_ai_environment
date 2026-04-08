@@ -37,6 +37,16 @@ def _reward_score(value: float) -> float:
     return _clamp_score(float(value) * REWARD_SCALE)
 
 
+def _increment_score(current_score: float, delta: float) -> float:
+    return safe_score(float(current_score) + float(delta))
+
+
+def _nonzero_reward_base(value: float) -> float:
+    if value is None or float(value) <= 0:
+        return SCORE_EPSILON
+    return float(value)
+
+
 class DeterministicGrader:
     def evaluate_action(self, ticket_case: TicketCase, action: Action, progress: TicketProgress) -> GradeResult:
         expectation = ticket_case.expected_outputs
@@ -50,11 +60,13 @@ class DeterministicGrader:
             progress.escalation_attempted = True
 
         if action_type in progress.consumed_actions:
-            progress.raw_score -= DUPLICATE_ACTION_PENALTY
+            progress.raw_score = _increment_score(progress.raw_score, -DUPLICATE_ACTION_PENALTY)
             progress.penalties += DUPLICATE_ACTION_PENALTY
             feedback = "Duplicate action penalty applied."
+            score = _reward_score(SCORE_EPSILON)
+            assert 0 < score < 1, f"Invalid score: {score}"
             return GradeResult(
-                reward=Reward(score=_reward_score(0.0), feedback=feedback),
+                reward=Reward(score=score, feedback=feedback),
                 raw_delta=-DUPLICATE_ACTION_PENALTY,
                 feedback=feedback,
             )
@@ -67,11 +79,13 @@ class DeterministicGrader:
         )
 
         if expected_action is None or action_type != expected_action:
-            progress.raw_score -= WRONG_ORDER_PENALTY
+            progress.raw_score = _increment_score(progress.raw_score, -WRONG_ORDER_PENALTY)
             progress.penalties += WRONG_ORDER_PENALTY
             feedback = "Wrong action order penalty applied."
+            score = _reward_score(SCORE_EPSILON)
+            assert 0 < score < 1, f"Invalid score: {score}"
             return GradeResult(
-                reward=Reward(score=_reward_score(0.0), feedback=feedback),
+                reward=Reward(score=score, feedback=feedback),
                 raw_delta=-WRONG_ORDER_PENALTY,
                 feedback=feedback,
             )
@@ -132,7 +146,7 @@ class DeterministicGrader:
                         f"Escalation attempted without the expected route {expectation.escalation_team}."
                     )
 
-        progress.raw_score += raw_delta
+        progress.raw_score = _increment_score(progress.raw_score, raw_delta)
 
         if (
             not expectation.escalation_required
@@ -140,14 +154,17 @@ class DeterministicGrader:
             and not progress.escalation_decision_awarded
             and not progress.escalation_attempted
         ):
-            progress.raw_score += ESCALATION_SCORE
+            progress.raw_score = _increment_score(progress.raw_score, ESCALATION_SCORE)
             raw_delta += ESCALATION_SCORE
             progress.escalation_decision_awarded = True
             feedback_parts.append("Correctly kept the ticket self-serve without escalation.")
 
         feedback = " ".join(feedback_parts) or "Action evaluated."
+        score = _reward_score(_nonzero_reward_base(raw_delta))
+        assert 0 < progress.raw_score < 1, f"Invalid score: {progress.raw_score}"
+        assert 0 < score < 1, f"Invalid score: {score}"
         return GradeResult(
-            reward=Reward(score=_reward_score(max(raw_delta, 0.0)), feedback=feedback),
+            reward=Reward(score=score, feedback=feedback),
             raw_delta=float(raw_delta),
             feedback=feedback,
         )

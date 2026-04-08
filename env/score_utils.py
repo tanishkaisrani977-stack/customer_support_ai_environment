@@ -16,10 +16,11 @@ def safe_score(score):
     score = float(score)
 
     if score <= 0:
-        return epsilon
-    if score >= 1:
-        return 1 - epsilon
+        score = epsilon
+    elif score >= 1:
+        score = 1 - epsilon
 
+    assert 0 < score < 1, f"Invalid score: {score}"
     return score
 
 
@@ -40,4 +41,3 @@ def validate_scores(scores):
         assert score is not None
         assert not (isinstance(score, float) and math.isnan(score))
         assert 0 < score < 1, f"{name} out of range: {score}"
-
