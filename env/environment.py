@@ -4,7 +4,7 @@ from .grader import DeterministicGrader
 from .models import Action, EnvironmentSnapshot, Observation, Priority, Reward, TaskDefinition, TicketCase, TicketProgress
 from .tasks import get_task, list_tasks
 
-STEP_REWARD_EPSILON = 0.0001
+STEP_REWARD_EPSILON = 1e-6
 
 
 class CustomerSupportEnv:
@@ -108,12 +108,7 @@ class CustomerSupportEnv:
         return self._normalize_task_score(sum(ticket_scores) / len(ticket_scores))
 
     def _normalize_task_score(self, value: float) -> float:
-        rounded = round(value, 4)
-        if rounded <= 0.0:
-            return 0.001
-        if rounded >= 1.0:
-            return 0.999
-        return rounded
+        return max(STEP_REWARD_EPSILON, min(1.0 - STEP_REWARD_EPSILON, round(float(value), 6)))
 
     def _build_task_reward(self, feedback: str) -> Reward:
         if self.done:
@@ -125,7 +120,7 @@ class CustomerSupportEnv:
             reward_score = STEP_REWARD_EPSILON
 
         reward_score = min(self.total_score, reward_score) if self.done else reward_score
-        reward_score = max(STEP_REWARD_EPSILON, min(0.999, float(reward_score)))
+        reward_score = max(STEP_REWARD_EPSILON, min(1.0 - STEP_REWARD_EPSILON, float(reward_score)))
         self.emitted_reward_total = round(self.emitted_reward_total + reward_score, 6)
         return Reward(score=reward_score, feedback=feedback)
 

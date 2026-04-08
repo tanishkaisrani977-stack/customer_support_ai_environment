@@ -36,13 +36,13 @@ class CustomerSupportEnvTests(unittest.TestCase):
             )
         )
 
-        self.assertAlmostEqual(reward_1.score, 0.0001, places=4)
-        self.assertAlmostEqual(reward_2.score, 0.9989, places=4)
+        self.assertAlmostEqual(reward_1.score, 0.000001, places=6)
+        self.assertAlmostEqual(reward_2.score, 0.999998, places=6)
         self.assertFalse(done_1)
         self.assertTrue(done_2)
         self.assertGreater(info["total_score"], 0.0)
         self.assertLess(info["total_score"], 1.0)
-        self.assertEqual(info["total_score"], 0.999)
+        self.assertEqual(info["total_score"], 0.999999)
 
     def test_hard_ticket_requires_multiple_actions_before_advancing(self):
         env = CustomerSupportEnv(task_name="hard")
@@ -72,7 +72,7 @@ class CustomerSupportEnvTests(unittest.TestCase):
             )
         )
         self.assertFalse(done)
-        self.assertAlmostEqual(reward.score, 0.0001, places=4)
+        self.assertAlmostEqual(reward.score, 0.000001, places=6)
         self.assertEqual(info["current_ticket_id"], 302)
         self.assertEqual(observation.ticket_id, 302)
 
@@ -82,9 +82,9 @@ class CustomerSupportEnvTests(unittest.TestCase):
 
         _, reward, done, info = env.step(Action(action_type="reply", content="We can help."))
 
-        self.assertEqual(reward.score, 0.0001)
+        self.assertEqual(reward.score, 0.000001)
         self.assertFalse(done)
-        self.assertEqual(info["ticket_scores"], [0.001])
+        self.assertEqual(info["ticket_scores"], [0.000001])
         self.assertGreater(info["total_score"], 0.0)
         self.assertLess(info["total_score"], 1.0)
         self.assertIn("Wrong action order penalty applied.", info["feedback"])

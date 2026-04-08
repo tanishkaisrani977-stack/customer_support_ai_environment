@@ -15,6 +15,7 @@ WRONG_ESCALATION_PENALTY = 0.2
 UNSAFE_REPLY_PENALTY = 0.1
 WEAK_REPLY_PENALTY = 0.1
 REWARD_SCALE = 0.999
+SCORE_EPSILON = 1e-6
 
 
 @dataclass
@@ -29,12 +30,7 @@ def _normalize(text: str) -> str:
 
 
 def _clamp_score(value: float) -> float:
-    rounded = round(value, 4)
-    if rounded <= 0.0:
-        return 0.001
-    if rounded >= 1.0:
-        return 0.999
-    return rounded
+    return max(SCORE_EPSILON, min(1.0 - SCORE_EPSILON, round(float(value), 6)))
 
 
 def _reward_score(value: float) -> float:

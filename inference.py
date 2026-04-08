@@ -330,7 +330,7 @@ def run_task(client: OpenAI, model_name: str, task_name: str) -> float:
             print(f"[DEBUG] step={step_number} source=model")
 
     total_score = info["total_score"]
-    print(f"[END] Task={task_name} TotalScore={total_score:.3f}")
+    print(f"[END] Task={task_name} TotalScore={total_score:.6f}")
     return total_score
 
 

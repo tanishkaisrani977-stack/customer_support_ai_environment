@@ -53,7 +53,7 @@ def get_metadata():
         "app": "server.app:app",
         "port": int(os.getenv("PORT", "8000")),
         "tasks": list_tasks(),
-        "reward_range": [0.0001, 0.9999],
+        "reward_range": [1e-6, 1 - 1e-6],
         "endpoints": {
             "reset": "/reset",
             "step": "/step",
@@ -74,7 +74,7 @@ def get_schema():
         "reward": {
             "type": "object",
             "properties": {
-                "score": {"type": "number", "minimum": 0.0001, "maximum": 0.9999},
+                "score": {"type": "number", "minimum": 1e-6, "maximum": 1 - 1e-6},
                 "feedback": {"type": "string"},
             },
             "required": ["score", "feedback"],

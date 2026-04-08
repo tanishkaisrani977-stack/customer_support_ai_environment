@@ -134,8 +134,8 @@ class InferenceTests(unittest.TestCase):
         self.assertEqual(output[2], "[DEBUG] step=1 source=fallback reason=Inference request failed: RuntimeError: offline")
         self.assertTrue(output[3].startswith("[STEP] step=2 action="))
         self.assertEqual(output[4], "[DEBUG] step=2 source=fallback reason=Inference request failed: RuntimeError: offline")
-        self.assertEqual(output[5], "[END] Task=easy TotalScore=0.999")
-        self.assertEqual(score, 0.999)
+        self.assertEqual(output[5], "[END] Task=easy TotalScore=0.999999")
+        self.assertEqual(score, 0.999999)
 
     def test_main_runs_all_tasks(self):
         buffer = io.StringIO()
