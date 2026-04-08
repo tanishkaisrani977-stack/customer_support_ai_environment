@@ -16,7 +16,7 @@ class CustomerSupportEnv:
         self.step_count = 0
         self.done = False
         self.ticket_progress: list[TicketProgress] = []
-        self.total_score = 0.0
+        self.total_score = safe_score(None)
         self.emitted_reward_total = 0.0
         self.current_observation = self._terminal_observation()
         self.reset()
@@ -125,9 +125,12 @@ class CustomerSupportEnv:
             reward_score = SCORE_EPSILON
 
         if self.done:
-            reward_score = min(float(self.total_score), float(reward_score))
+            if reward_score > float(self.total_score):
+                reward_score = float(self.total_score)
         reward_score = safe_score(reward_score)
-        self.emitted_reward_total = min(float(self.total_score), float(self.emitted_reward_total + reward_score))
+        self.emitted_reward_total = float(self.emitted_reward_total + reward_score)
+        if self.emitted_reward_total > float(self.total_score):
+            self.emitted_reward_total = float(self.total_score)
         assert 0 < reward_score < 1, f"Invalid score: {reward_score}"
         return Reward(score=reward_score, feedback=feedback)
 

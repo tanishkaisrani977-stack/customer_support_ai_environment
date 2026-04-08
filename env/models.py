@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from .score_utils import safe_score
+from .score_utils import SCORE_EPSILON, safe_score
 
 
 class StringEnum(str, Enum):
@@ -107,7 +107,7 @@ class TicketProgress(BaseModel):
     consumed_actions: list[ActionType] = Field(default_factory=list)
     correct_actions: list[ActionType] = Field(default_factory=list)
     action_history: list[str] = Field(default_factory=list)
-    raw_score: float = 0.0
+    raw_score: float = SCORE_EPSILON
     penalties: float = 0.0
     action_count: int = 0
     escalation_attempted: bool = False

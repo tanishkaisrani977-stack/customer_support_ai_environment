@@ -3,7 +3,8 @@ from __future__ import annotations
 import math
 
 
-SCORE_EPSILON = 1e-6
+EPS = 1e-6
+SCORE_EPSILON = EPS
 MAX_SAFE_SCORE = 1 - SCORE_EPSILON
 
 
